@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"io"
 	"log"
+	"net/http"
 
 	"golang.org/x/net/html"
 )
@@ -20,7 +21,17 @@ func DownloadCIFP() []byte {
 	}
 	log.Printf("CIFP is at %s", zipURL)
 
-	cifpZipBytes := FetchURL(zipURL)
+	resp, err := http.Get(zipURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	var cifpZipBytes []byte
+	if cifpZipBytes, err = io.ReadAll(resp.Body); err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Received %d bytes", len(cifpZipBytes))
 
 	cifpZip, err := zip.NewReader(bytes.NewReader(cifpZipBytes), int64(len(cifpZipBytes)))
 	if err != nil {
@@ -58,9 +69,14 @@ func DownloadCIFP() []byte {
 // Scrape the FAA CIFP webpage to get the URL to the zip file with the latest CIFP.
 func GetCIFPZipURL() string {
 	url := "https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/cifp/download/"
-	h := FetchURL(url)
+	log.Print("Scraping CIFP page at " + url)
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
 
-	doc, err := html.Parse(bytes.NewReader(h))
+	doc, err := html.Parse(resp.Body)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -6,10 +6,8 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"maps"
-	"net/http"
 	"os"
 	"slices"
 
@@ -42,25 +40,6 @@ func WriteJSON[T any](data T, filename string) {
 	}
 
 	log.Printf("Wrote %q", filename)
-}
-
-func FetchURL(url string) []byte {
-	log.Printf("Fetching %s", url)
-
-	response, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer response.Body.Close()
-
-	var text []byte
-	if text, err = io.ReadAll(response.Body); err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Received %d bytes", len(text))
-
-	return text
 }
 
 func Select[T any](sel bool, a, b T) T {

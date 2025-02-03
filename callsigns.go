@@ -5,8 +5,8 @@
 package main
 
 import (
-	"bytes"
 	"log"
+	"net/http"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -20,11 +20,16 @@ type Callsign struct {
 
 func ScrapeCallsigns() {
 	url := "https://www.faa.gov/air_traffic/publications/atpubs/cnt_html/chap3_section_3.html"
-	h := FetchURL(url)
+	log.Printf("Fetching %s", url)
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
 
 	callsigns := make(map[string]Callsign)
 
-	doc, err := html.Parse(bytes.NewReader(h))
+	doc, err := html.Parse(resp.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
