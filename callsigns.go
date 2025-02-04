@@ -18,7 +18,7 @@ type Callsign struct {
 	Country   string
 }
 
-func ScrapeCallsigns() {
+func ScrapeCallsigns() map[string]Callsign {
 	url := "https://www.faa.gov/air_traffic/publications/atpubs/cnt_html/chap3_section_3.html"
 	log.Printf("Fetching %s", url)
 	resp, err := http.Get(url)
@@ -71,5 +71,5 @@ func ScrapeCallsigns() {
 		parse(child)
 	}
 
-	WriteJSON(callsigns, "callsigns.json")
+	return callsigns
 }
